@@ -12,10 +12,16 @@ class LLMClient:
         )
         self.temperature = config['temperature']
     
-    def chat(self, messages: List[Dict[str, str]], stream: bool = True) -> Any:
-        return self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=self.temperature,
-            stream=stream
-        )
+    def chat(self, messages: List[Dict[str, str]], stream: bool = True, tools: Optional[List[Dict]] = None) -> Any:
+        params = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": self.temperature,
+            "stream": stream
+        }
+        
+        if tools:
+            params["tools"] = tools
+            params["tool_choice"] = "auto"
+        
+        return self.client.chat.completions.create(**params)
