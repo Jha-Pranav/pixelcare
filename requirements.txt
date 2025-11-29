@@ -1,0 +1,8 @@
+# Core dependencies for PixelCare Phase 1
+opencv-python>=4.8.0
+mediapipe>=0.10.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# UI dependencies
+gradio>=4.0.0
