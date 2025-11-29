@@ -3,6 +3,8 @@
 import gradio as gr
 import sys
 from pathlib import Path
+from datetime import datetime, timedelta
+from collections import defaultdict
 
 # Add paths
 root = Path(__file__).parent
@@ -16,6 +18,36 @@ import document_processor
 health_agent = agent.HealthAgent()
 doc_processor = document_processor.DocumentProcessor()
 uploaded_docs = []
+
+# Rate limiting
+user_requests = defaultdict(list)
+MAX_REQUESTS_PER_HOUR = 20
+MAX_REQUESTS_PER_MINUTE = 5
+
+def check_rate_limit(session_id):
+    """Check if user exceeded rate limit"""
+    now = datetime.now()
+    
+    # Clean old requests
+    user_requests[session_id] = [
+        req_time for req_time in user_requests[session_id]
+        if now - req_time < timedelta(hours=1)
+    ]
+    
+    # Check limits
+    recent_requests = [
+        req_time for req_time in user_requests[session_id]
+        if now - req_time < timedelta(minutes=1)
+    ]
+    
+    if len(recent_requests) >= MAX_REQUESTS_PER_MINUTE:
+        return False, "⚠️ Rate limit: Max 5 requests per minute. Please wait."
+    
+    if len(user_requests[session_id]) >= MAX_REQUESTS_PER_HOUR:
+        return False, "⚠️ Rate limit: Max 20 requests per hour. Please try again later."
+    
+    user_requests[session_id].append(now)
+    return True, None
 
 def handle_file_upload(files):
     """Handle uploaded documents"""
@@ -47,11 +79,18 @@ def clear_documents():
     uploaded_docs = []
     return "Documents cleared"
 
-def chat_fn(message, history):
-    """Chat with document support"""
+def chat_fn(message, history, request: gr.Request):
+    """Chat with document support and rate limiting"""
     global uploaded_docs
     
     if not message:
+        return history
+    
+    # Rate limiting
+    session_id = request.session_hash
+    allowed, error_msg = check_rate_limit(session_id)
+    if not allowed:
+        history.append((message, error_msg))
         return history
     
     # If documents uploaded, use vision
@@ -83,6 +122,8 @@ with gr.Blocks(title="PixelCare AI") as demo:
     ⚠️ **Cloud Limitation:** Camera vitals not working in HuggingFace (working on fix). All features work locally!
     
     ✅ **Working:** Document analysis, health Q&A | 📥 **Full features:** [Run locally](https://github.com/Jha-Pranav/pixelcare)
+    
+    🔒 **Rate Limits:** 5 requests/minute, 20 requests/hour (to prevent abuse)
     """)
     
     chatbot = gr.Chatbot(label="Chat", height=500)
