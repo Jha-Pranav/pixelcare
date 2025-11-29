@@ -125,11 +125,13 @@ with gr.Blocks(title="PixelCare AI") as demo:
     gr.Markdown("""
     **🤖 AI Health Assistant** - Upload medical documents and get expert insights!
     
-    ⚠️ **Cloud Limitation:** Camera vitals not working in HuggingFace (working on fix). All features work locally!
+    ✅ **Working Now:** Document analysis (PDFs, X-rays, prescriptions), Health Q&A
     
-    ✅ **Working:** Document analysis, health Q&A | 📥 **Full features:** [Run locally](https://github.com/Jha-Pranav/pixelcare)
+    🚧 **Coming Soon:** Video-based vitals (upload 10-sec video for basic vitals)
     
-    🔒 **Rate Limits:** 5 requests/minute, 20 requests/hour (to prevent abuse)
+    📥 **Full Features:** [Install locally](https://github.com/Jha-Pranav/pixelcare) for real-time camera vitals (heart rate, breathing, HRV, stress in 10 seconds)
+    
+    🔒 **Rate Limits:** 5 requests/minute, 20 requests/hour
     """)
     
     chatbot = gr.Chatbot(label="Chat", height=500)
