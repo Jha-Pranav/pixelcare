@@ -1,5 +1,16 @@
-[model]
-name = "qwen3:14b"
-url = "http://192.168.29.147:11500/v1"
+# Choose provider: "openai" or "ollama"
+provider = "ollama"  # Change to "openai" for OpenAI
+
+[model.openai]
+name = "gpt-4o-mini"
+url = "https://api.openai.com/v1"
+api_key = ""  # Set via OPENAI_API_KEY environment variable
+temperature = 0.7
+max_tokens = 2000
+
+[model.ollama]
+name = "qwen2.5:7b"
+url = "http://localhost:11434/v1"
 api_key = "ollama"
 temperature = 0.7
+max_tokens = 2000

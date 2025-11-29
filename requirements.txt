@@ -6,3 +6,7 @@ scipy>=1.11.0
 
 # UI dependencies
 gradio>=4.0.0
+
+# LLM dependencies
+openai>=1.0.0
+toml>=0.10.2
