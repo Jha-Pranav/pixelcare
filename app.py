@@ -72,11 +72,11 @@ def chat_fn(message, history):
 with gr.Blocks(title="PixelCare AI") as demo:
     gr.Markdown("# 🏥 PixelCare - AI Health Companion")
     gr.Markdown("""
-    **🤖 Agentic AI** - I can analyze medical documents and answer health questions.
+    **🤖 AI Health Assistant** - Upload medical documents and get expert insights!
     
-    💡 **Try:** Upload blood test/X-ray • Ask health questions • Get expert insights
+    ⚠️ **Cloud Limitation:** Camera vitals not working in HuggingFace (working on fix). All features work locally!
     
-    ⚠️ **Note:** Camera vitals require [local installation](https://github.com/Jha-Pranav/pixelcare)
+    ✅ **Working:** Document analysis, health Q&A | 📥 **Full features:** [Run locally](https://github.com/Jha-Pranav/pixelcare)
     """)
     
     chatbot = gr.Chatbot(label="Chat", height=500)
