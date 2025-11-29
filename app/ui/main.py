@@ -58,6 +58,19 @@ def get_mood_prompt(vitals):
 
 def format_vitals_summary(vitals):
     """Format vitals as beautiful HTML"""
+    if vitals is None:
+        return """
+<div style="background: #dc3545; padding: 20px; border-radius: 12px; color: white;">
+    <h3>❌ Vitals Collection Failed</h3>
+    <p>Unable to collect vitals. Please ensure:</p>
+    <ul>
+        <li>Camera is working and accessible</li>
+        <li>You're in a well-lit area</li>
+        <li>Face is visible to camera</li>
+    </ul>
+</div>
+"""
+    
     summary = vitals.get('session_summary', {})
     pv = vitals.get('physiological_vitals', {})
     status = summary.get('overall_health_status', {})
@@ -372,17 +385,22 @@ Provide a personalized response to their question using the vitals data."""
 
 with gr.Blocks(title="PixelCare AI") as demo:
     gr.Markdown("# 🏥 PixelCare - AI Health Companion")
-    gr.Markdown("🤖 **Agentic AI** - Ask any health question, AI will collect vitals if needed")
+    gr.Markdown("""
+    **🤖 Agentic AI** - I can check your vitals, analyze medical documents, and answer health questions.
     
-    chatbot = gr.Chatbot(label="Chat", height=500)
+    💡 **Try:** "Check my vitals" • Upload blood test/X-ray • "Am I stressed?" • "Explain this report"
+    """)
+    
+    chatbot = gr.Chatbot(label="Chat", height=650)
     
     with gr.Row():
         msg = gr.Textbox(
             label="Message", 
             placeholder="Ask about your health or upload medical documents...",
-            scale=9
+            scale=8
         )
         file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"], scale=1, size="sm", variant="primary")
+        submit_btn = gr.Button("Send", variant="primary", scale=1)
     
     file_status = gr.Markdown("", visible=True, elem_classes="upload-status")
     
@@ -428,6 +446,7 @@ with gr.Blocks(title="PixelCare AI") as demo:
     file_upload.upload(handle_file_upload, inputs=[file_upload], outputs=[file_status])
     
     msg.submit(submit_and_clear, [msg, chatbot], [msg, chatbot], queue=True)
+    submit_btn.click(submit_and_clear, [msg, chatbot], [msg, chatbot], queue=True)
 
 if __name__ == "__main__":
     from config import get_model_config

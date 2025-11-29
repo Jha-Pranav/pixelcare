@@ -567,11 +567,12 @@ class LiveVitalsCollector:
         """Identify potential health risk factors"""
         risks = []
         
-        if hr.get('average', 0) > 100 or hr.get('average', 0) < 50:
+        hr_avg = hr.get('average', 0)
+        if hr_avg > 100 or hr_avg < 50:
             risks.append({
                 "factor": "abnormal_heart_rate",
                 "severity": "moderate",
-                "description": f"Heart rate {hr['average']} BPM is outside typical range"
+                "description": f"Heart rate {hr_avg} BPM is outside typical range"
             })
         
         if br.get('rapid_breathing_percentage', 0) > 50:
