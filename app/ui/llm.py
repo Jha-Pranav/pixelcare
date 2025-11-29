@@ -1,6 +1,9 @@
 from typing import List, Dict, Any, Optional
 from openai import OpenAI
-from .config import get_model_config
+try:
+    from .config import get_model_config
+except ImportError:
+    from config import get_model_config
 import base64
 
 class LLMClient:

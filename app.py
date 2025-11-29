@@ -9,11 +9,12 @@ root = Path(__file__).parent
 sys.path.insert(0, str(root / "app" / "ui"))
 sys.path.insert(0, str(root / "app"))
 
-from agent import HealthAgent
-from document_processor import DocumentProcessor
+# Import with absolute imports
+import agent
+import document_processor
 
-agent = HealthAgent()
-doc_processor = DocumentProcessor()
+health_agent = agent.HealthAgent()
+doc_processor = document_processor.DocumentProcessor()
 uploaded_docs = []
 
 def handle_file_upload(files):
@@ -56,7 +57,7 @@ def chat_response(message, history):
         thinking_text = ""
         answer_text = ""
         
-        for thinking, answer in agent.chat_with_vision(content):
+        for thinking, answer in health_agent.chat_with_vision(content):
             thinking_text = thinking
             answer_text = answer
             
@@ -81,7 +82,7 @@ def chat_response(message, history):
     thinking_text = ""
     answer_text = ""
     
-    for thinking, answer in agent.chat(message):
+    for thinking, answer in health_agent.chat(message):
         thinking_text = thinking
         answer_text = answer
         

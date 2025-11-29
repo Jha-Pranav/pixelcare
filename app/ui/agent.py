@@ -1,5 +1,8 @@
 from typing import List, Dict, Generator, Tuple
-from .llm import LLMClient
+try:
+    from .llm import LLMClient
+except ImportError:
+    from llm import LLMClient
 
 SYSTEM_PROMPT = """You are PixelCare AI, a compassionate and knowledgeable health companion assistant designed to empower users with health insights.
 
