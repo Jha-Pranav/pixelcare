@@ -1,15 +1,4 @@
----
-title: PixelCare
-emoji: 🏥
-colorFrom: blue
-colorTo: green
-sdk: gradio
-sdk_version: 4.0.0
-app_file: app.py
-pinned: false
-license: mit
-short_description: AI health companion that measures 10 vital signs from webcam
----
+
 
 # PixelCare 🏥
 ## Your Health, One Pixel at a Time
