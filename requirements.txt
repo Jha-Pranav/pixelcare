@@ -1,4 +1,4 @@
-gradio>=6.0.0
+gradio==6.0.1
 openai>=1.0.0
 toml>=0.10.2
 opencv-python>=4.8.0
@@ -8,4 +8,3 @@ scipy>=1.11.0
 PyPDF2>=3.0.0
 Pillow>=10.0.0
 pdf2image>=1.17.0
-# Updated Sat Nov 29 13:37:36 IST 2025
