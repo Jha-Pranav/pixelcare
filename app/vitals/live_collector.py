@@ -2,17 +2,17 @@ import cv2
 import time
 import json
 import numpy as np
-from heart_rate_chrom import CHROMHeartRate
-from breathing_rate import BreathingDetector
-from blink_detector import BlinkDetector
-from hrv_analyzer import HRVAnalyzer
-from emotion import EmotionDetector
-from pose_extractor import PoseExtractor
-from gaze_tracker import GazeTracker
-from head_pose_estimator import HeadPoseEstimator
-from posture_analyzer import PostureAnalyzer
-from movement_detector import MovementDetector
-from facial_action_units import FacialActionUnits
+from .heart_rate_chrom import CHROMHeartRate
+from .breathing_rate import BreathingDetector
+from .blink_detector import BlinkDetector
+from .hrv_analyzer import HRVAnalyzer
+from .emotion import EmotionDetector
+from .pose_extractor import PoseExtractor
+from .gaze_tracker import GazeTracker
+from .head_pose_estimator import HeadPoseEstimator
+from .posture_analyzer import PostureAnalyzer
+from .movement_detector import MovementDetector
+from .facial_action_units import FacialActionUnits
 
 class LiveVitalsCollector:
     def __init__(self, duration=10, fps=30, sample_interval=30, vital_sample_interval=60, headless=False):

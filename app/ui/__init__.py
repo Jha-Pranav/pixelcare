@@ -1,1 +1,1 @@
-
+"""PixelCare UI Module"""

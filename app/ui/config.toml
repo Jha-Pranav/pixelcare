@@ -1,5 +1,5 @@
 # Choose provider: "openai" or "ollama"
-provider = "ollama"  # Change to "openai" for OpenAI
+provider = "openai"  # Change to "openai" for OpenAI
 
 [model.openai]
 name = "gpt-4o-mini"

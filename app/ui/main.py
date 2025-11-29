@@ -5,11 +5,14 @@ import sys
 import json
 import time
 import cv2
-sys.path.append('../vitals')
+from pathlib import Path
 
-from live_collector import LiveVitalsCollector
-from agent import HealthAgent
-from llm import LLMClient
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from vitals.live_collector import LiveVitalsCollector
+from ui.agent import HealthAgent
+from ui.llm import LLMClient
 
 agent = HealthAgent()
 llm_client = LLMClient()
