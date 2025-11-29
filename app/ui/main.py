@@ -27,7 +27,7 @@ VITALS_TOOL = {
     "type": "function",
     "function": {
         "name": "collect_vitals",
-        "description": "REQUIRED: Collect real-time health vitals from the user's webcam. Use this tool when user asks to: check vitals, scan health, measure heart rate, check stress, see how they're doing, or any request about their current physical state. This captures heart rate, breathing rate, HRV, stress levels, posture, and overall health score in 10 seconds.",
+        "description": "ALWAYS use this tool when user says: 'collect my vitals', 'check my vitals', 'scan my health', 'measure my heart rate', 'check my stress', 'how am I doing', or asks about their current physical state. This tool accesses the webcam to measure heart rate, breathing rate, HRV, stress levels, posture, and overall health score in 10 seconds. DO NOT explain how to manually measure vitals - USE THIS TOOL INSTEAD.",
         "parameters": {
             "type": "object",
             "properties": {
