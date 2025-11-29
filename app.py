@@ -41,6 +41,12 @@ def handle_file_upload(files):
     names = [doc['name'] for doc in uploaded_docs]
     return f"**✅ Uploaded:** {', '.join(names)}"
 
+def clear_documents():
+    """Clear uploaded documents"""
+    global uploaded_docs
+    uploaded_docs = []
+    return "Documents cleared"
+
 def chat_fn(message, history):
     """Chat with document support"""
     global uploaded_docs
@@ -89,6 +95,7 @@ with gr.Blocks(title="PixelCare AI") as demo:
     with gr.Row():
         submit_btn = gr.Button("Send", variant="primary")
         file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"])
+        clear_btn = gr.Button("Clear Docs", variant="secondary")
     
     file_status = gr.Markdown("")
     
@@ -105,6 +112,7 @@ with gr.Blocks(title="PixelCare AI") as demo:
     )
     
     file_upload.upload(handle_file_upload, inputs=[file_upload], outputs=[file_status])
+    clear_btn.click(clear_documents, outputs=[file_status])
     
     msg.submit(chat_fn, [msg, chatbot], [chatbot]).then(lambda: "", None, [msg])
     submit_btn.click(chat_fn, [msg, chatbot], [chatbot]).then(lambda: "", None, [msg])
