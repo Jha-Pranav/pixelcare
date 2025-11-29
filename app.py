@@ -41,12 +41,12 @@ def handle_file_upload(files):
     names = [doc['name'] for doc in uploaded_docs]
     return f"**✅ Uploaded:** {', '.join(names)}"
 
-def chat_response(message, history):
-    """Chat with document support"""
+def submit_and_clear(message, chat_history):
+    """Submit message and clear input"""
     global uploaded_docs
     
-    if history is None:
-        history = []
+    if chat_history is None:
+        chat_history = []
     
     # If documents uploaded, use vision
     if uploaded_docs:
@@ -54,73 +54,62 @@ def chat_response(message, history):
         for doc in uploaded_docs:
             content.extend(doc['content'])
         
-        thinking_text = ""
-        answer_text = ""
-        
         for thinking, answer in health_agent.chat_with_vision(content):
-            thinking_text = thinking
-            answer_text = answer
-            
-            if thinking_text:
-                full_response = f"""
+            if thinking:
+                response = f"""
 <details style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #764ba2;">
     <summary style="color: #fff; font-weight: bold; cursor: pointer;">🤔 Analyzing Document (click to expand)</summary>
-    <div style="color: #f0f0f0; font-family: monospace; white-space: pre-wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">{thinking_text}</div>
+    <div style="color: #f0f0f0; font-family: monospace; white-space: pre-wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">{thinking}</div>
 </details>
 <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
     <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">📄 Document Analysis</div>
-    <div style="color: #333;">{answer_text}</div>
+    <div style="color: #333;">{answer}</div>
 </div>
 """
             else:
-                full_response = answer_text
+                response = answer
             
-            yield "", history + [{"role": "user", "content": message}, {"role": "assistant", "content": full_response}]
+            yield "", chat_history + [{"role": "user", "content": message}, {"role": "assistant", "content": response}]
         return
     
     # Regular chat
-    thinking_text = ""
-    answer_text = ""
-    
     for thinking, answer in health_agent.chat(message):
-        thinking_text = thinking
-        answer_text = answer
-        
-        if thinking_text:
-            full_response = f"""
+        if thinking:
+            response = f"""
 <details style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #764ba2;">
     <summary style="color: #fff; font-weight: bold; cursor: pointer;">🤔 Thinking (click to expand)</summary>
-    <div style="color: #f0f0f0; font-family: monospace; white-space: pre-wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">{thinking_text}</div>
+    <div style="color: #f0f0f0; font-family: monospace; white-space: pre-wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">{thinking}</div>
 </details>
 <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
     <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">💬 Answer</div>
-    <div style="color: #333;">{answer_text}</div>
+    <div style="color: #333;">{answer}</div>
 </div>
 """
         else:
-            full_response = answer_text
+            response = answer
         
-        yield "", history + [{"role": "user", "content": message}, {"role": "assistant", "content": full_response}]
+        yield "", chat_history + [{"role": "assistant", "content": response}]
 
 with gr.Blocks(title="PixelCare AI") as demo:
     gr.Markdown("# 🏥 PixelCare - AI Health Companion")
     gr.Markdown("""
-    ⚠️ **Cloud Demo Mode** - Camera-based vitals collection requires local installation. 
+    **🤖 Agentic AI** - I can analyze medical documents and answer health questions.
     
-    ✅ **Available**: Chat, Document Analysis (upload blood tests, X-rays, prescriptions)
+    💡 **Try:** Upload blood test/X-ray • "What does this mean?" • "Explain my results"
     
-    📥 **To use vitals collection**: Run locally with `./run_ui.sh` - [See README](https://github.com/Jha-Pranav/pixelcare)
+    ⚠️ **Note:** Camera vitals require [local installation](https://github.com/Jha-Pranav/pixelcare)
     """)
     
-    chatbot = gr.Chatbot(label="Chat", height=500)
+    chatbot = gr.Chatbot(label="Chat", height=650)
+    
+    msg = gr.Textbox(
+        label="Message", 
+        placeholder="Ask about your health or upload medical documents..."
+    )
     
     with gr.Row():
-        msg = gr.Textbox(
-            label="Message",
-            placeholder="Ask health questions or upload medical documents...",
-            scale=9
-        )
-        file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"], scale=1, size="sm", variant="primary")
+        submit_btn = gr.Button("Send", variant="primary", scale=1)
+        file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"], scale=1, size="sm", variant="secondary")
     
     file_status = gr.Markdown("", visible=True)
     
@@ -140,7 +129,8 @@ with gr.Blocks(title="PixelCare AI") as demo:
     
     file_upload.upload(handle_file_upload, inputs=[file_upload], outputs=[file_status])
     
-    msg.submit(chat_response, [msg, chatbot], [msg, chatbot], queue=True)
+    msg.submit(submit_and_clear, [msg, chatbot], [msg, chatbot], queue=True)
+    submit_btn.click(submit_and_clear, [msg, chatbot], [msg, chatbot], queue=True)
 
 if __name__ == "__main__":
     demo.launch()
