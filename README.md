@@ -20,7 +20,9 @@ short_description: AI health companion that measures 10 vital signs from webcam
 
 > *"What if your laptop could be your health companion? What if checking your vitals was as simple as looking at your screen?"*
 
-PixelCare is an AI-powered health companion that transforms your webcam into a medical-grade sensor, measuring 10 vital signs in just 10 seconds. But it's more than a health scanner—it's your personal health buddy that understands both your physical state and emotional wellbeing, providing expert second opinions with transparent clinical reasoning.
+PixelCare is an AI-powered health companion that transforms your webcam into a medical-grade sensor, measuring 10 vital signs in just 10 seconds. But it's more than a health scanner—it's your personal health buddy that understands both your physical state and emotional wellbeing, analyzes your medical documents, and provides expert second opinions with transparent clinical reasoning.
+
+**✨ NEW: Upload and analyze medical documents (PDFs, X-rays, blood tests, prescriptions) with GPT-4o-mini vision!**
 
 **Not replacing your doctor - Empowering you with informed health decisions.**
 
@@ -46,10 +48,20 @@ git clone https://github.com/Jha-Pranav/pixelcare.git
 cd pixelcare
 
 # Option A: Using uv (recommended - faster)
+pip install uv
 uv sync
 
 # Option B: Using pip
 pip install -r requirements.txt
+
+# Install poppler for PDF processing (macOS)
+brew install poppler
+
+# For Linux:
+# sudo apt-get install poppler-utils
+
+# For Windows:
+# Download from: https://github.com/oschwartz10612/poppler-windows/releases
 ```
 
 #### Configuration
@@ -87,9 +99,11 @@ export LLM_PROVIDER=ollama
 **Or create a `.env` file:**
 
 ```bash
-# .env
+# Create .env file
+cat > .env << EOF
 LLM_PROVIDER=openai
 OPENAI_API_KEY=sk-your-key-here
+EOF
 ```
 
 **Step 3: Run the App**
@@ -135,6 +149,59 @@ PixelCare is your 24/7 virtual doctor that provides:
 - 💬 **Second Opinions** - Ask health questions and get expert guidance with transparent reasoning
 - 🧠 **Clinical Intelligence** - See how the AI thinks through medical decisions
 - 🔒 **100% Private** - All processing happens locally on your device (with Ollama)
+
+---
+
+## 📄 Document Upload & Analysis (NEW!)
+
+### Supported Formats
+- **PDF**: Blood tests, prescriptions, medical reports, lab results
+- **Images**: X-rays, MRI scans, CT scans, ultrasounds (JPG, PNG, WEBP)
+
+### How It Works
+1. Click the **Upload** button next to the message input
+2. Select one or multiple medical documents
+3. Ask questions about your documents
+4. Get instant AI-powered analysis with GPT-4o-mini vision
+
+### Example Use Cases
+
+**Blood Test Analysis:**
+```
+Upload: blood_test.pdf
+Ask: "What are my key findings? Are any values concerning?"
+Get: Detailed breakdown of all metrics, normal ranges, and recommendations
+```
+
+**X-ray Review:**
+```
+Upload: chest_xray.jpg
+Ask: "What does this X-ray show?"
+Get: Visual analysis, findings explanation, and follow-up suggestions
+```
+
+**Prescription Understanding:**
+```
+Upload: prescription.pdf
+Ask: "Explain my medications and when to take them"
+Get: Clear medication schedule, purposes, and side effects to watch for
+```
+
+**Combined Analysis:**
+```
+Upload: medical_report.pdf
+Then: "Check my vitals now"
+Ask: "How do my current vitals compare to this report?"
+Get: Comprehensive analysis connecting real-time data with historical records
+```
+
+### Features
+- ✅ Multi-file upload support
+- ✅ Automatic format detection (PDF vs images)
+- ✅ High-quality image processing for accurate analysis
+- ✅ Text extraction fallback for PDFs
+- ✅ Production-grade AI prompts for clinical accuracy
+- ✅ Plain language explanations of medical terminology
 
 ---
 
@@ -736,10 +803,16 @@ opencv-python>=4.8.0      # Computer vision
 mediapipe>=0.10.0         # Face/pose detection (Google)
 numpy>=1.24.0             # Numerical computing
 scipy>=1.11.0             # Signal processing
-gradio>=4.0.0             # Web interface
+gradio>=6.0.0             # Web interface
 openai>=1.0.0             # LLM API
 toml>=0.10.2              # Configuration
+PyPDF2>=3.0.0             # PDF text extraction
+Pillow>=10.0.0            # Image processing
+pdf2image>=1.17.0         # PDF to image conversion
 ```
+
+**System Requirements:**
+- `poppler` - PDF rendering (install via brew/apt/chocolatey)
 
 ---
 

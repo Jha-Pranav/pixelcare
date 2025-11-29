@@ -13,17 +13,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from vitals.live_collector import LiveVitalsCollector
 from ui.agent import HealthAgent
 from ui.llm import LLMClient
+from ui.document_processor import DocumentProcessor
+from ui.document_processor import DocumentProcessor
 
 agent = HealthAgent()
 llm_client = LLMClient()
+doc_processor = DocumentProcessor()
 latest_vitals = None
+uploaded_docs = []
 
 # Tool definition for vitals collection
 VITALS_TOOL = {
     "type": "function",
     "function": {
         "name": "collect_vitals",
-        "description": "Collect real-time health vitals from the user's camera including heart rate, breathing rate, HRV, blink rate, stress levels, and overall health score. Use this when the user asks about their current health status, vitals, or any health metrics that require real-time measurement.",
+        "description": "REQUIRED: Collect real-time health vitals from the user's webcam. Use this tool when user asks to: check vitals, scan health, measure heart rate, check stress, see how they're doing, or any request about their current physical state. This captures heart rate, breathing rate, HRV, stress levels, posture, and overall health score in 10 seconds.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -200,11 +204,66 @@ def collect_vitals_with_progress():
     
     return format_vitals_summary(latest_vitals)
 
+def handle_file_upload(files):
+    """Handle uploaded documents"""
+    global uploaded_docs
+    
+    if not files:
+        uploaded_docs = []
+        return ""
+    
+    uploaded_docs = []
+    file_list = files if isinstance(files, list) else [files]
+    
+    for file in file_list:
+        try:
+            content = doc_processor.process_file(file.name)
+            uploaded_docs.append({
+                'name': Path(file.name).name,
+                'content': content
+            })
+        except Exception as e:
+            return f"**❌ Error:** {Path(file.name).name} - {str(e)}"
+    
+    names = [doc['name'] for doc in uploaded_docs]
+    return f"**✅ Uploaded:** {', '.join(names)}"
+
 def chat_with_agentic_vitals(message, history):
     """Agentic chat with intelligent vitals collection"""
-    global latest_vitals
+    global latest_vitals, uploaded_docs
     
-    # First, check if AI wants to collect vitals
+    # If documents are uploaded, pass directly to agent with vision
+    if uploaded_docs:
+        content = [{"type": "text", "text": message}]
+        for doc in uploaded_docs:
+            content.extend(doc['content'])
+        
+        # Stream response from agent with documents
+        thinking_text = ""
+        answer_text = ""
+        
+        for thinking, answer in agent.chat_with_vision(content):
+            thinking_text = thinking
+            answer_text = answer
+            
+            if thinking_text:
+                full_response = f"""
+<details style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #764ba2;">
+    <summary style="color: #fff; font-weight: bold; cursor: pointer;">🤔 Analyzing Document (click to expand)</summary>
+    <div style="color: #f0f0f0; font-family: monospace; white-space: pre-wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">{thinking_text}</div>
+</details>
+<div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
+    <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">📄 Document Analysis</div>
+    <div style="color: #333;">{answer_text}</div>
+</div>
+"""
+            else:
+                full_response = answer_text
+            
+            yield full_response
+        return
+    
+    # Build message for tool checking
     messages = [{"role": "user", "content": message}]
     
     response = llm_client.chat(messages, stream=False, tools=[VITALS_TOOL])
@@ -315,17 +374,60 @@ with gr.Blocks(title="PixelCare AI") as demo:
     gr.Markdown("# 🏥 PixelCare - AI Health Companion")
     gr.Markdown("🤖 **Agentic AI** - Ask any health question, AI will collect vitals if needed")
     
-    gr.ChatInterface(
-        fn=chat_with_agentic_vitals,
+    chatbot = gr.Chatbot(label="Chat", height=500)
+    
+    with gr.Row():
+        msg = gr.Textbox(
+            label="Message", 
+            placeholder="Ask about your health or upload medical documents...",
+            scale=9
+        )
+        file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"], scale=1, size="sm", variant="primary")
+    
+    file_status = gr.Markdown("", visible=True, elem_classes="upload-status")
+    
+    gr.Examples(
         examples=[
-            "🎥 Collect vitals",
-            "How am I doing today?",
-            "What's my current heart rate?",
-            "Am I stressed right now?",
-            "Check my health status",
-            "What is a normal heart rate?"
-        ]
-    )
+            "🎥 Check my vitals now",
+            "How am I doing today? Scan my health",
+            "Measure my heart rate and stress levels",
+            "Am I stressed right now? What can I do about it?",
+            "Why is my heart rate elevated?",
+            "What's a healthy breathing rate?",
+            "How can I improve my posture?",
+            "Analyze my blood test report - are my values normal?",
+            "What does my cholesterol level mean?",
+            "Explain my CBC results in simple terms",
+            "Is my vitamin D level concerning?",
+            "What does this X-ray show? Any abnormalities?",
+            "Explain the findings in my MRI report",
+            "What should I know about this ultrasound?",
+            "Explain my prescription - what are these medications for?",
+            "What are the side effects I should watch for?",
+            "When and how should I take these medications?",
+            "Can these medications interact with each other?",
+            "Compare my current vitals with this medical report",
+            "How do my vitals match what my doctor said?",
+            "Should I be concerned based on my vitals and this report?",
+            "What lifestyle changes can improve my health?",
+                    "How can I reduce my stress naturally?",
+                    "Tips for better sleep and recovery"
+                ],
+                inputs=msg
+            )
+    
+    def submit_and_clear(message, chat_history):
+        if chat_history is None:
+            chat_history = []
+        
+        new_history = chat_history + [{"role": "user", "content": message}]
+        
+        for response in chat_with_agentic_vitals(message, chat_history):
+            yield "", new_history + [{"role": "assistant", "content": response}]
+    
+    file_upload.upload(handle_file_upload, inputs=[file_upload], outputs=[file_status])
+    
+    msg.submit(submit_and_clear, [msg, chatbot], [msg, chatbot], queue=True)
 
 if __name__ == "__main__":
     from config import get_model_config
