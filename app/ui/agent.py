@@ -12,7 +12,7 @@ class HealthAgent:
         ]
     
     def chat(self, message: str) -> Generator[Tuple[str, str], None, None]:
-        """Returns (thinking, response) tuples"""
+        """Returns (thinking, response) tuples - handles both OpenAI reasoning and <think> tags"""
         self.history.append({"role": "user", "content": message})
         
         response = self.llm.chat(self.history, stream=True)
@@ -25,12 +25,12 @@ class HealthAgent:
             if chunk.choices[0].delta:
                 delta = chunk.choices[0].delta
                 
-                # Handle reasoning field (native model thinking)
+                # Handle OpenAI reasoning field (o1, o3 models)
                 if hasattr(delta, 'reasoning') and delta.reasoning:
                     thinking += delta.reasoning
                     yield (thinking, answer)
                 
-                # Handle content with <think> tags
+                # Handle content with <think> tags (other models)
                 if hasattr(delta, 'content') and delta.content:
                     content = delta.content
                     full_response += content

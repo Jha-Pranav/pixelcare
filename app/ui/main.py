@@ -1,4 +1,4 @@
-#!/usr/bin/env -S uv run
+#!/usr/bin/env python3
 """PixelCare - AI Health Companion with Agentic Vitals Collection"""
 import gradio as gr
 import sys
@@ -315,30 +315,16 @@ with gr.Blocks(title="PixelCare AI") as demo:
     gr.Markdown("# 🏥 PixelCare - AI Health Companion")
     gr.Markdown("🤖 **Agentic AI** - Ask any health question, AI will collect vitals if needed")
     
-    with gr.Row():
-        collect_btn = gr.Button("🎥 Quick Collect Vitals", variant="primary", size="lg")
-    
-    chatbot = gr.ChatInterface(
+    gr.ChatInterface(
         fn=chat_with_agentic_vitals,
         examples=[
+            "🎥 Collect vitals",
             "How am I doing today?",
             "What's my current heart rate?",
             "Am I stressed right now?",
             "Check my health status",
             "What is a normal heart rate?"
         ]
-    )
-    
-    def quick_collect():
-        return "collect vitals"
-    
-    collect_btn.click(
-        fn=lambda: [("collect vitals", None)],
-        outputs=chatbot.chatbot
-    ).then(
-        fn=chat_with_agentic_vitals,
-        inputs=[gr.Textbox(value="collect vitals", visible=False), chatbot.chatbot],
-        outputs=chatbot.chatbot
     )
 
 if __name__ == "__main__":
