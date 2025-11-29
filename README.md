@@ -33,24 +33,68 @@ Visit: **[PixelCare on Hugging Face](https://huggingface.co/spaces/Jha-Pranav/pi
 
 ### Run Locally
 
+#### Prerequisites
+- Python 3.10+
+- Webcam
+- OpenAI API key OR Ollama installed locally
+
+#### Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/Jha-Pranav/pixelcare.git
 cd pixelcare
 
-# Install dependencies
-pip install -r requirements.txt
+# Option A: Using uv (recommended - faster)
+uv sync
 
-# Set up environment (choose one)
+# Option B: Using pip
+pip install -r requirements.txt
+```
+
+#### Configuration
+
+**Step 1: Configure LLM Provider**
+
+Edit `app/ui/config.toml` or use environment variables:
+
+```toml
+# app/ui/config.toml
+provider = "openai"  # or "ollama"
+
+[model.openai]
+name = "gpt-4o-mini"
+temperature = 0.7
+max_tokens = 2000
+
+[model.ollama]
+name = "qwen2.5:7b"
+url = "http://localhost:11434/v1"
+```
+
+**Step 2: Set Environment Variables**
+
+```bash
 # Option 1: Use OpenAI
 export LLM_PROVIDER=openai
-export OPENAI_API_KEY=sk-your-key
+export OPENAI_API_KEY=sk-your-key-here
 
-# Option 2: Use Ollama (100% local)
+# Option 2: Use Ollama (100% local & free)
 export LLM_PROVIDER=ollama
 # Make sure Ollama is running: ollama serve
+```
 
-# Launch
+**Or create a `.env` file:**
+
+```bash
+# .env
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-your-key-here
+```
+
+**Step 3: Run the App**
+
+```bash
 ./run_ui.sh
 ```
 
