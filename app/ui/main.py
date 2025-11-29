@@ -393,14 +393,14 @@ with gr.Blocks(title="PixelCare AI") as demo:
     
     chatbot = gr.Chatbot(label="Chat", height=650)
     
+    msg = gr.Textbox(
+        label="Message", 
+        placeholder="Ask about your health or upload medical documents..."
+    )
+    
     with gr.Row():
-        msg = gr.Textbox(
-            label="Message", 
-            placeholder="Ask about your health or upload medical documents...",
-            scale=8
-        )
-        file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"], scale=1, size="sm", variant="primary")
         submit_btn = gr.Button("Send", variant="primary", scale=1)
+        file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"], scale=1, size="sm", variant="secondary")
     
     file_status = gr.Markdown("", visible=True, elem_classes="upload-status")
     

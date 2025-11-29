@@ -16,7 +16,7 @@ short_description: AI health companion that measures 10 vital signs from webcam
 
 **Your 24/7 Virtual Doctor for Second Opinions**
 
-![PixelCare](https://raw.githubusercontent.com/Jha-Pranav/pixelcare/main/PixelCare-Image.png)
+![PixelCare](./image.png)
 
 > *"What if your laptop could be your health companion? What if checking your vitals was as simple as looking at your screen?"*
 
