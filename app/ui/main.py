@@ -43,6 +43,9 @@ VITALS_TOOL = {
 
 def get_mood_prompt(vitals):
     """Adjust LLM mood based on vitals"""
+    if vitals is None:
+        return "You are caring and supportive. The vitals collection failed. Be empathetic and helpful."
+    
     summary = vitals.get('session_summary', {})
     status = summary.get('overall_health_status', {})
     score = status.get('score', 50)

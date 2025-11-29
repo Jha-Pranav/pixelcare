@@ -467,25 +467,27 @@ class LiveVitalsCollector:
         issues = []
         
         # Heart rate check
-        if hr['status'] == 'abnormal':
+        hr_avg = hr.get('average', 0)
+        if hr.get('status') == 'abnormal':
             score -= 20
-            issues.append(f"Heart rate {hr['average']} BPM is outside normal range")
+            issues.append(f"Heart rate {hr_avg} BPM is outside normal range")
         
         # Breathing check
-        if br['status'] == 'abnormal':
+        br_avg = br.get('average', 0)
+        if br.get('status') == 'abnormal':
             score -= 15
-            issues.append(f"Breathing rate {br['average']} BPM is abnormal")
+            issues.append(f"Breathing rate {br_avg} BPM is abnormal")
         
         # HRV check
         if hrv.get('status') == 'calculated':
-            if hrv['stress_level'] == 'high':
+            if hrv.get('stress_level') == 'high':
                 score -= 25
                 issues.append("High stress detected via HRV")
-            elif hrv['stress_level'] == 'moderate':
+            elif hrv.get('stress_level') == 'moderate':
                 score -= 10
         
         # Posture check
-        if posture['status'] == 'poor':
+        if posture.get('status') == 'poor':
             score -= 15
             issues.append("Poor posture detected")
         
