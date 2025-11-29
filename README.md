@@ -20,7 +20,7 @@ PixelCare is an AI-powered health companion that transforms your webcam into a m
 ## 🚀 Quick Start
 
 ### Try Online (Instant)
-Visit: **[PixelCare on Hugging Face](https://huggingface.co/spaces/Jha-Pranav/pixelcare)**
+Visit: **[PixelCare on Hugging Face](https://huggingface.co/spaces/Jha-Pranav/PixelCare)**
 
 ### Run Locally
 
