@@ -41,12 +41,12 @@ def handle_file_upload(files):
     names = [doc['name'] for doc in uploaded_docs]
     return f"**✅ Uploaded:** {', '.join(names)}"
 
-def submit_and_clear(message, chat_history):
-    """Submit message and clear input"""
+def chat_fn(message, history):
+    """Chat with document support"""
     global uploaded_docs
     
-    if chat_history is None:
-        chat_history = []
+    if not message:
+        return history
     
     # If documents uploaded, use vision
     if uploaded_docs:
@@ -54,53 +54,32 @@ def submit_and_clear(message, chat_history):
         for doc in uploaded_docs:
             content.extend(doc['content'])
         
+        response = ""
         for thinking, answer in health_agent.chat_with_vision(content):
-            if thinking:
-                response = f"""
-<details style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #764ba2;">
-    <summary style="color: #fff; font-weight: bold; cursor: pointer;">🤔 Analyzing Document (click to expand)</summary>
-    <div style="color: #f0f0f0; font-family: monospace; white-space: pre-wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">{thinking}</div>
-</details>
-<div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
-    <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">📄 Document Analysis</div>
-    <div style="color: #333;">{answer}</div>
-</div>
-"""
-            else:
-                response = answer
-            
-            yield "", chat_history + [{"role": "user", "content": message}, {"role": "assistant", "content": response}]
-        return
+            response = answer if not thinking else f"**Thinking:** {thinking}\n\n{answer}"
+        
+        history.append((message, response))
+        return history
     
     # Regular chat
+    response = ""
     for thinking, answer in health_agent.chat(message):
-        if thinking:
-            response = f"""
-<details style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #764ba2;">
-    <summary style="color: #fff; font-weight: bold; cursor: pointer;">🤔 Thinking (click to expand)</summary>
-    <div style="color: #f0f0f0; font-family: monospace; white-space: pre-wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">{thinking}</div>
-</details>
-<div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
-    <div style="color: #28a745; font-weight: bold; margin-bottom: 8px;">💬 Answer</div>
-    <div style="color: #333;">{answer}</div>
-</div>
-"""
-        else:
-            response = answer
-        
-        yield "", chat_history + [{"role": "assistant", "content": response}]
+        response = answer if not thinking else f"**Thinking:** {thinking}\n\n{answer}"
+    
+    history.append((message, response))
+    return history
 
 with gr.Blocks(title="PixelCare AI") as demo:
     gr.Markdown("# 🏥 PixelCare - AI Health Companion")
     gr.Markdown("""
     **🤖 Agentic AI** - I can analyze medical documents and answer health questions.
     
-    💡 **Try:** Upload blood test/X-ray • "What does this mean?" • "Explain my results"
+    💡 **Try:** Upload blood test/X-ray • Ask health questions • Get expert insights
     
     ⚠️ **Note:** Camera vitals require [local installation](https://github.com/Jha-Pranav/pixelcare)
     """)
     
-    chatbot = gr.Chatbot(label="Chat", height=650)
+    chatbot = gr.Chatbot(label="Chat", height=500)
     
     msg = gr.Textbox(
         label="Message", 
@@ -108,10 +87,10 @@ with gr.Blocks(title="PixelCare AI") as demo:
     )
     
     with gr.Row():
-        submit_btn = gr.Button("Send", variant="primary", scale=1)
-        file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"], scale=1, size="sm", variant="secondary")
+        submit_btn = gr.Button("Send", variant="primary")
+        file_upload = gr.UploadButton("Upload", file_count="multiple", file_types=[".pdf", ".jpg", ".jpeg", ".png", ".webp"])
     
-    file_status = gr.Markdown("", visible=True)
+    file_status = gr.Markdown("")
     
     gr.Examples(
         examples=[
@@ -119,18 +98,16 @@ with gr.Blocks(title="PixelCare AI") as demo:
             "How can I reduce stress naturally?",
             "Explain blood pressure readings",
             "What does high cholesterol mean?",
-            "Tips for better sleep",
             "Analyze my blood test report",
-            "What does this X-ray show?",
-            "Explain my prescription medications"
+            "What does this X-ray show?"
         ],
         inputs=msg
     )
     
     file_upload.upload(handle_file_upload, inputs=[file_upload], outputs=[file_status])
     
-    msg.submit(submit_and_clear, [msg, chatbot], [msg, chatbot], queue=True)
-    submit_btn.click(submit_and_clear, [msg, chatbot], [msg, chatbot], queue=True)
+    msg.submit(chat_fn, [msg, chatbot], [chatbot]).then(lambda: "", None, [msg])
+    submit_btn.click(chat_fn, [msg, chatbot], [chatbot]).then(lambda: "", None, [msg])
 
 if __name__ == "__main__":
     demo.launch()
