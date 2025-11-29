@@ -8,3 +8,4 @@ scipy>=1.11.0
 PyPDF2>=3.0.0
 Pillow>=10.0.0
 pdf2image>=1.17.0
+# Updated Sat Nov 29 13:37:36 IST 2025
