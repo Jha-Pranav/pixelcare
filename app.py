@@ -79,15 +79,21 @@ def clear_documents():
     uploaded_docs = []
     return "Documents cleared"
 
-def chat_fn(message, history, request: gr.Request):
+def chat_fn(message, history):
     """Chat with document support and rate limiting"""
     global uploaded_docs
     
     if not message:
         return history
     
-    # Rate limiting
-    session_id = request.session_hash
+    # Rate limiting (use a default session if request not available)
+    try:
+        import inspect
+        frame = inspect.currentframe()
+        session_id = str(id(frame))
+    except:
+        session_id = "default"
+    
     allowed, error_msg = check_rate_limit(session_id)
     if not allowed:
         history.append((message, error_msg))
